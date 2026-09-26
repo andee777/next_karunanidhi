@@ -59,17 +59,17 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={[inter.variable, calSans.variable].join(" ")}
+			className={[
+				inter.variable,
+				calSans.variable,
+				"bg-zinc-50 dark:bg-zinc-950",
+			].join(" ")}
 			suppressHydrationWarning
 		>
 			<head>
 				<Analytics />
 			</head>
-			<body
-				className={`bg-zinc-50 dark:bg-zinc-950 ${
-					process.env.NODE_ENV === "development" ? "debug-screens" : ""
-				}`}
-			>
+			<body className="bg-zinc-50 dark:bg-zinc-950">
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 					{children}
 				</ThemeProvider>

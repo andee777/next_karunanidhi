@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @source "./content";
 @plugin "@tailwindcss/typography";
-@plugin "tailwindcss-debug-screens";
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -11,7 +10,48 @@
 	--font-display: var(--font-calsans);
 }
 
+/* Home page's theme toggle (HomeHero): a diagonal reveal that travels from
+   the button's top-right corner to the bottom-left one. The boundary line
+   (P2–P4, the "active" edge each half) stays parallel to the TL–BR diagonal
+   the entire time — it only translates, never rotating around a fixed
+   corner — because P1 (TR) and P5 (TL) hold still while P2/P3/P4 slide along
+   the right, bottom and left edges in turn. Every stop keeps the same
+   5-point count so the browser tweens it smoothly. */
+@keyframes theme-wipe {
+	0% {
+		clip-path: polygon(100% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
+	}
+	50% {
+		clip-path: polygon(100% 0%, 100% 100%, 100% 100%, 0% 0%, 0% 0%);
+	}
+	100% {
+		clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 0% 100%, 0% 0%);
+	}
+}
+
+.theme-wipe-run {
+	/* linear, not ease-in-out: an easing curve applies separately across each
+	   half (0%–50% and 50%–100%), so it decelerates into the midpoint and
+	   re-accelerates out of it — reading as a stutter/pause right in the
+	   middle of the sweep. Linear keeps it at one constant, fluid speed. */
+	animation: theme-wipe 700ms linear forwards;
+}
+
 @layer base {
+	html {
+		/* Reserves the scrollbar's width whether or not a page needs to scroll,
+		   so the fixed nav and centered content don't shift horizontally when
+		   navigating between pages of different heights (e.g. /projects to
+		   /contact, both of which use <Navigation>). */
+		scrollbar-gutter: stable;
+	}
+
+	/* The homepage (#home) never scrolls and has no shared nav to protect, so
+	   the reserved gutter just left dead space at the edge; turn it off there. */
+	html:has(#home) {
+		scrollbar-gutter: auto;
+	}
+
 	.text-edge-outline-dark {
 		-webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
 	}

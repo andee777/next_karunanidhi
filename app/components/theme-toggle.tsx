@@ -17,7 +17,13 @@ export function ThemeToggle({ className = "" }: Props) {
 	}, []);
 
 	if (!mounted) {
-		return <div className={`w-6 h-6 ${className}`} aria-hidden="true" />;
+		// Same box as the button below (its classes + a 20px icon), so nothing
+		// shifts when it swaps in after mount.
+		return (
+			<div className={className} aria-hidden="true">
+				<div className="w-5 h-5" />
+			</div>
+		);
 	}
 
 	return (

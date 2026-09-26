@@ -46,22 +46,14 @@ type CanvasMetrics = {
 
 const SYMBOLS: Particle["symbol"][] = ["{", "}"];
 
-// Weighted 2:3 so blue shows up slightly more often than amber/yellow.
-const LIGHT_PALETTE: RGB[] = [
+// Weighted 2:3 so blue shows up slightly more often than amber/yellow. Used
+// in both themes — only the alpha range (below) differs by theme.
+const PALETTE: RGB[] = [
 	{ r: 255, g: 224, b: 0 },
 	{ r: 255, g: 224, b: 0 },
 	{ r: 0, g: 143, b: 255 },
 	{ r: 0, g: 143, b: 255 },
 	{ r: 0, g: 143, b: 255 },
-];
-// Lighter tints than the light-mode palette — the same alpha reads as a
-// subtle wash on a light background but is nearly invisible on near-black.
-const DARK_PALETTE: RGB[] = [
-	{ r: 252, g: 211, b: 77 },
-	{ r: 252, g: 211, b: 77 },
-	{ r: 56, g: 189, b: 248 },
-	{ r: 56, g: 189, b: 248 },
-	{ r: 56, g: 189, b: 248 },
 ];
 
 const LIGHT_ALPHA_RANGE: [min: number, max: number] = [0.18, 0.65];
@@ -236,12 +228,7 @@ export default function Particles({
 			dy: randomBetween(-DRIFT_SPEED, DRIFT_SPEED),
 			magnetism: randomBetween(MAGNETISM_MIN, MAGNETISM_MAX),
 			symbol,
-			sprite: createSprite(
-				symbol,
-				size,
-				pick(isDark ? DARK_PALETTE : LIGHT_PALETTE),
-				dpr,
-			),
+			sprite: createSprite(symbol, size, pick(PALETTE), dpr),
 		};
 	}, []);
 
@@ -302,12 +289,16 @@ export default function Particles({
 
 			particlesRef.current = particlesRef.current.map((particle) => {
 				const edgeFade = computeEdgeFade(particle, width, height);
+				// Ramps towards targetAlpha from either side — a plain
+				// `Math.min(alpha + step, target)` only ever rises, so a theme
+				// switch that lowers the target (dark's palette is more opaque
+				// than light's) would otherwise snap particles dim instantly
+				// instead of fading down with the rest of the transition.
+				const maxStep = ALPHA_RAMP_STEP * timeScale;
 				const alpha =
 					edgeFade >= 1
-						? Math.min(
-								particle.alpha + ALPHA_RAMP_STEP * timeScale,
-								particle.targetAlpha,
-							)
+						? particle.alpha +
+							clamp(particle.targetAlpha - particle.alpha, -maxStep, maxStep)
 						: particle.targetAlpha * edgeFade;
 
 				const nextX = particle.x + particle.dx * timeScale;
@@ -403,14 +394,8 @@ export default function Particles({
 	useEffect(() => {
 		themeRef.current = resolvedTheme;
 		const isDark = resolvedTheme === "dark";
-		const { dpr, maxParticleSize } = metricsRef.current;
+		const { maxParticleSize } = metricsRef.current;
 		for (const particle of particlesRef.current) {
-			particle.sprite = createSprite(
-				particle.symbol,
-				particle.size,
-				pick(isDark ? DARK_PALETTE : LIGHT_PALETTE),
-				dpr,
-			);
 			particle.targetAlpha = computeTargetAlpha(
 				particle.size,
 				maxParticleSize,
