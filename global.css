@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@source "./content";
+@plugin "@tailwindcss/typography";
+@plugin "tailwindcss-debug-screens";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--font-sans:
+		var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+		Roboto, "Helvetica Neue", Arial, sans-serif;
+	--font-display: var(--font-calsans);
+}
+
+@layer base {
+	.text-edge-outline-dark {
+		-webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+	}
+
+	.prose code::before,
+	.prose code::after {
+		content: none;
+	}
+
+	.prose-quoteless blockquote p:first-of-type::before,
+	.prose-quoteless blockquote p:first-of-type::after {
+		content: none;
+	}
+}

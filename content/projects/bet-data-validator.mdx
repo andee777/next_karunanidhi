@@ -1,0 +1,12 @@
+---
+title: Bet Data Validator
+description: A companion back-office tool that reconciles teams, leagues, bets, and match data between the main app's database and external sports data providers.
+date: "2026-04-05"
+repository: andee777/next_test_bets_data_validator
+published: true
+tags: ["Dashboard", "Data/Analytics"]
+---
+
+Bet Data Validator is the internal data-ops tool behind [Bet Tracker & Analytics](/projects/bet-tracker-analytics) — it reconciles teams, leagues, bets, and match data pulled from external providers like Fotmob and Sofascore against what's stored in the app's own database. It handles deduplicating teams that come in under different names, managing name aliases, and syncing scores, leagues, and live match state.
+
+Built with Next.js 16, Drizzle ORM over Postgres, `jose` for JWT auth, and TanStack Table/Virtual for browsing large, dense datasets without the UI choking.

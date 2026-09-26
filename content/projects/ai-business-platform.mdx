@@ -1,0 +1,11 @@
+---
+title: AI-Powered Business Platform
+description: A multi-tenant SaaS platform for small business accounting, payroll, VAT, and stock, with OCR-based document intelligence and an in-app AI assistant.
+date: "2026-08-10"
+published: true
+tags: ["SaaS", "AI"]
+---
+
+This is a multi-tenant SaaS platform I built for a client, covering accounting, payroll, VAT, stock, and asset management for small and medium businesses, plus OCR-based document intelligence — scan a receipt or invoice and have it turned into structured accounting data automatically. An in-app assistant gives users a conversational way to query and act on their own business data.
+
+The system uses a BFF architecture: a Next.js 16 frontend proxies every request to an internal-only FastAPI backend, which handles multi-tenant JWT-based RBAC, SQLAlchemy/Alembic against Postgres, MinIO for document storage, Redis-backed Celery workers for background jobs, an OCR pipeline combining TrOCR and Tesseract, and a self-hosted Ollama LLM for the assistant — keeping tenant data off third-party AI APIs.

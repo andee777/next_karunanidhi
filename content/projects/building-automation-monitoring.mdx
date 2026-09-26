@@ -1,0 +1,11 @@
+---
+title: Building Automation Monitoring
+description: A monitoring and control system for building-automation hardware — a BACnet gateway service, a Node.js API and dashboard, and companion mobile apps.
+date: "2022-06-01"
+published: true
+tags: ["IoT", "Mobile"]
+---
+
+A building-automation monitoring system I built for a client, covering everything from the hardware protocol layer up to the mobile app on-site staff used. A Python/Flask gateway service speaks BACnet to talk to the building's automation devices directly, a Node.js API and dashboard — Dockerized, behind nginx, backed by MySQL — aggregates and serves that data, and a React Native companion app gives staff live status and alerts.
+
+This was longer-running contract work: the service shipped real releases, including signed Android/iOS builds, and stayed in production with periodic maintenance — timestamp bug fixes, security hardening — over several years.

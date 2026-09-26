@@ -1,0 +1,11 @@
+---
+title: Vertical Farm IoT Platform
+description: An IoT platform for monitoring and controlling vertical hydroponic tower gardens, from a Next.js dashboard down to the firmware running on the ESP32 controllers.
+date: "2026-09-23"
+published: true
+tags: ["IoT", "Dashboard"]
+---
+
+This is a full-stack IoT platform I built for a client to monitor and control vertical hydroponic ("tower garden") systems remotely. ESP32 and ESP8266 controllers on each tower report sensor telemetry — pH, EC, water level, pump state — over MQTT, and the platform turns that stream into a live dashboard, historical charts, and an automation rule engine that can trigger pumps and dosing based on conditions.
+
+The control plane is a FastAPI service handling REST and WebSocket traffic, JWT auth via httpOnly cookies, Celery/Beat for scheduled jobs, and Postgres for time-series storage, sitting behind an Eclipse Mosquitto MQTT broker. On the device side, a firmware-flash service wraps `arduino-cli` to compile and push updates to boards over the air, and a device simulator lets the whole realtime pipeline be tested without physical hardware. The frontend is a Next.js 16 dashboard using TanStack Query for the live data layer.

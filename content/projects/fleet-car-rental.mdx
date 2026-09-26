@@ -1,0 +1,12 @@
+---
+title: Fleet — Car Rental Management
+description: A mobile-first fleet management tool built for a car rental business — vehicles, drivers, customers, bookings, and maintenance, with double-booking prevention enforced at the database level.
+date: "2026-09-15"
+repository: andee777/doudou-car-rental
+published: true
+tags: ["Dashboard"]
+---
+
+Fleet is an internal staff tool I built for a car rental business to manage its vehicles, drivers, customers, bookings, and maintenance schedule from a phone or tablet. Staff log in with a simple username, mapped internally to a synthetic Supabase email, rather than a full email/password flow — matching how the rental counter actually works day to day.
+
+The interesting engineering problem was preventing double bookings without race conditions, solved with a Postgres exclusion constraint rather than application-level locking, backed by a three-layer authorization model — edge middleware, a server-side data-access-layer check, and Postgres row-level security — so the rule holds even if a request skips the UI. Built on Next.js 16 with Turbopack, Supabase for Postgres/Auth/Storage, Tailwind v4 with shadcn/ui, and a typed English/French i18n layer for bilingual staff.

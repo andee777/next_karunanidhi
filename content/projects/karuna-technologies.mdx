@@ -1,0 +1,13 @@
+---
+title: Karuna Technologies
+description: The marketing site and lead-capture funnel for my software studio — animated landing page, project-inquiry and discovery-call forms, all wired to Postgres with automated confirmation emails.
+date: "2026-09-20"
+url: https://karunatech.ca
+repository: andee777/next_karuna_tech
+published: true
+tags: ["Marketing Site", "SaaS"]
+---
+
+Karuna Technologies is the public site for my software studio, covering web design, cloud hosting, workflow automation, and mobile development. Beyond the animated hero/services/process/testimonials landing page, it has a `/new-project` flow with two lead-capture forms — a project inquiry and a discovery-call booking — that write directly to a Neon serverless Postgres database and trigger confirmation emails through Resend.
+
+Built on Next.js 16 with the App Router and React Compiler, the visual layer combines Tailwind v4, shadcn/ui, and a set of WebGL/Three.js and OGL backgrounds (with Framer Motion and GSAP for the rest of the motion) — made hydration-safe so the animated backgrounds don't flash or mismatch on load. Server Actions validated with Zod handle form submissions end to end, with the data model itself enforcing invariants rather than relying only on client-side checks.

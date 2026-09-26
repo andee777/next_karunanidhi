@@ -1,0 +1,84 @@
+import "../global.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import LocalFont from "next/font/local";
+import { Analytics } from "./components/analytics";
+import { ThemeProvider } from "./components/theme-provider";
+
+export const metadata: Metadata = {
+	metadataBase: new URL("https://karunanidhi.dev"),
+	title: {
+		default: "karunanidhi.dev",
+		template: "%s | karunanidhi.dev",
+	},
+	description: "Founder of karunatech.ca",
+	openGraph: {
+		title: "karunanidhi.dev",
+		description: "Founder of karunatech.ca",
+		url: "https://karunanidhi.dev",
+		siteName: "karunanidhi.dev",
+		images: [
+			{
+				url: "https://karunanidhi.dev/logo1.png",
+				width: 1920,
+				height: 1080,
+			},
+		],
+		locale: "en-US",
+		type: "website",
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			"max-video-preview": -1,
+			"max-image-preview": "large",
+			"max-snippet": -1,
+		},
+	},
+	twitter: {
+		title: "Karunanidhi",
+		card: "summary_large_image",
+	},
+	icons: {
+		shortcut: "/favicon.png",
+	},
+};
+const inter = Inter({
+	subsets: ["latin"],
+	variable: "--font-inter",
+});
+
+const calSans = LocalFont({
+	src: "../public/fonts/CalSans-SemiBold.ttf",
+	variable: "--font-calsans",
+});
+
+export default function RootLayout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	return (
+		<html
+			lang="en"
+			className={[inter.variable, calSans.variable].join(" ")}
+			suppressHydrationWarning
+		>
+			<head>
+				<Analytics />
+			</head>
+			<body
+				className={`bg-zinc-50 dark:bg-zinc-950 ${
+					process.env.NODE_ENV === "development" ? "debug-screens" : ""
+				}`}
+			>
+				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+					{children}
+				</ThemeProvider>
+			</body>
+		</html>
+	);
+}

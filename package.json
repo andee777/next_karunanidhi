@@ -1,0 +1,42 @@
+{
+	"name": "karunanidhi.dev",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "pnpm@11.0.8",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"fmt": "biome check --write .",
+		"lint": "biome lint ."
+	},
+	"dependencies": {
+		"@icons-pack/react-simple-icons": "^13.15.1",
+		"framer-motion": "^13.4.4",
+		"gray-matter": "^4.0.3",
+		"lucide-react": "^1.48.0",
+		"next": "^16.3.6",
+		"next-mdx-remote": "^6.0.0",
+		"next-themes": "^0.4.6",
+		"react": "^19.3.0",
+		"react-dom": "^19.3.0",
+		"rehype-autolink-headings": "^7.1.0",
+		"rehype-pretty-code": "^0.14.5",
+		"rehype-slug": "^6.0.0",
+		"remark-gfm": "^4.0.1",
+		"shiki": "^4.4.3",
+		"typescript": "^7.0.2",
+		"zod": "^4.6.5"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.14",
+		"@opentelemetry/api": "1.6.0",
+		"@tailwindcss/postcss": "^4.3.3",
+		"@tailwindcss/typography": "^0.5.20",
+		"@types/node": "^26.6.2",
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"tailwindcss": "^4.3.3",
+		"tailwindcss-debug-screens": "^3.0.1"
+	}
+}
