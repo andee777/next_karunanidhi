@@ -205,7 +205,7 @@ importers:
         version: 1.48.0(react@19.3.0)
       next:
         specifier: ^16.3.6
-        version: 16.3.6(@opentelemetry/api@1.6.0)(@types/node@26.6.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 16.3.6(@types/node@26.6.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       next-mdx-remote:
         specifier: ^6.0.0
         version: 6.0.0(@types/react@19.3.0)(react@19.3.0)
@@ -233,9 +233,6 @@ importers:
       shiki:
         specifier: ^4.4.3
         version: 4.4.3
-      typescript:
-        specifier: ^7.0.2
-        version: 7.0.2
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -243,9 +240,6 @@ importers:
       '@biomejs/biome':
         specifier: ^2.5.14
         version: 2.5.14
-      '@opentelemetry/api':
-        specifier: 1.6.0
-        version: 1.6.0
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
@@ -267,6 +261,9 @@ importers:
       tailwindcss-debug-screens:
         specifier: ^3.0.1
         version: 3.0.1(tailwindcss@4.3.3)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
 
 packages:
 
@@ -596,10 +593,6 @@ packages:
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
-
-  '@opentelemetry/api@1.6.0':
-    resolution: {integrity: sha512-OWlrQAnWn9577PhVgqjUvMr1pg57Bc4jv0iL4w0PRuOSRvq67rvHW9Ie/dZVMvCzhSCB+UxhcY/PmCmFj33Q+g==}
-    engines: {node: '>=8.0.0'}
 
   '@shikijs/core@4.4.3':
     resolution: {integrity: sha512-QCR4q2ZO/ILJEuwiBMel4wdcTDb1JGwfjKTxPDF6x8ixOaluPrVqIn06C99AcRPhmYlBR56d/Fb+GN58GzExpg==}
@@ -1118,8 +1111,8 @@ packages:
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  js-yaml@3.14.1:
-    resolution: {integrity: sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==}
+  js-yaml@3.15.2:
+    resolution: {integrity: sha512-6EuL879VkRA+1Cz578mKMiKvjPNEuk6+r1JaFzoSWejZmtf7xWbIyw1e3KkxlkzTIt9Taw6JBhEppG7utc1P+w==}
     hasBin: true
 
   kind-of@6.0.3:
@@ -1655,9 +1648,9 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
-  yaml@2.7.0:
-    resolution: {integrity: sha512-+hSoy/QHluxmC9kCIJyL/uyFmLmc+e5CFR5Wa+bpIhIj85LVb9ZH2nVnqrHoSvKogwODv0ClqZkmiSSaIH5LTA==}
-    engines: {node: '>= 14'}
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
     hasBin: true
 
   zod@4.6.5:
@@ -1914,8 +1907,6 @@ snapshots:
 
   '@next/swc-win32-x64-msvc@16.3.6':
     optional: true
-
-  '@opentelemetry/api@1.6.0': {}
 
   '@shikijs/core@4.4.3':
     dependencies:
@@ -2272,7 +2263,7 @@ snapshots:
 
   gray-matter@4.0.3:
     dependencies:
-      js-yaml: 3.14.1
+      js-yaml: 3.15.2
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
@@ -2403,7 +2394,7 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  js-yaml@3.14.1:
+  js-yaml@3.15.2:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
@@ -2929,7 +2920,7 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  next@16.3.6(@opentelemetry/api@1.6.0)(@types/node@26.6.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  next@16.3.6(@types/node@26.6.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@next/env': 16.3.6
       '@swc/helpers': 0.5.23
@@ -2948,7 +2939,6 @@ snapshots:
       '@next/swc-linux-x64-musl': 16.3.6
       '@next/swc-win32-arm64-msvc': 16.3.6
       '@next/swc-win32-x64-msvc': 16.3.6
-      '@opentelemetry/api': 1.6.0
       sharp: 0.35.4(@types/node@26.6.2)
     transitivePeerDependencies:
       - '@babel/core'
@@ -3309,7 +3299,7 @@ snapshots:
   vfile-matter@5.0.1:
     dependencies:
       vfile: 6.0.3
-      yaml: 2.7.0
+      yaml: 2.9.1
 
   vfile-message@4.0.2:
     dependencies:
@@ -3323,7 +3313,7 @@ snapshots:
 
   web-namespaces@2.0.1: {}
 
-  yaml@2.7.0: {}
+  yaml@2.9.1: {}
 
   zod@4.6.5: {}
 

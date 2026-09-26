@@ -22,7 +22,9 @@ export const Header: React.FC<Props> = ({ project }) => {
 		links.push({
 			label: "GitHub",
 			href: `https://github.com/${project.repository}`,
-			icon: <SiGithub className="w-5 h-5" color="currentColor" />,
+			icon: (
+				<SiGithub className="w-5 h-5" color="currentColor" aria-hidden="true" />
+			),
 		});
 	}
 	if (project.url) {
@@ -56,13 +58,18 @@ export const Header: React.FC<Props> = ({ project }) => {
 			>
 				<div className="container flex flex-row-reverse items-center justify-between p-6 mx-auto">
 					<div className="flex justify-between gap-8">
-						<Link target="_blank" href="https://github.com/andee777">
+						<Link
+							target="_blank"
+							href="https://github.com/andee777"
+							aria-label="GitHub profile"
+						>
 							<SiGithub
 								color="currentColor"
+								aria-hidden="true"
 								className={`w-6 h-6 duration-200 hover:font-medium ${
 									isIntersecting
 										? " text-zinc-400 hover:text-zinc-100"
-										: "text-zinc-600 hover:text-zinc-900"
+										: "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
 								} `}
 							/>
 						</Link>
@@ -70,10 +77,11 @@ export const Header: React.FC<Props> = ({ project }) => {
 
 					<Link
 						href="/projects"
+						aria-label="Back to projects"
 						className={`duration-200 hover:font-medium ${
 							isIntersecting
 								? " text-zinc-400 hover:text-zinc-100"
-								: "text-zinc-600 hover:text-zinc-900"
+								: "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
 						} `}
 					>
 						<ArrowLeft className="w-6 h-6 " />

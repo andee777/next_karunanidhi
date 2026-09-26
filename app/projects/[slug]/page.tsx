@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Mdx } from "@/app/components/mdx";
+import { openGraphDefaults } from "@/lib/metadata";
 import { getAllProjects, getProjectBySlug } from "@/lib/projects";
 import { Header } from "./header";
 import "./mdx.css";
@@ -29,17 +30,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		return {};
 	}
 
+	const url = `/projects/${project.slug}`;
 	return {
 		title: project.title,
 		description: project.description,
+		alternates: { canonical: url },
 		openGraph: {
+			...openGraphDefaults,
 			title: project.title,
 			description: project.description,
 			type: "article",
-		},
-		twitter: {
-			title: project.title,
-			description: project.description,
+			url,
 		},
 	};
 }

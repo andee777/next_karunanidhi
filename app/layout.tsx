@@ -2,30 +2,26 @@ import "../global.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import LocalFont from "next/font/local";
+import {
+	defaultOpenGraphImages,
+	openGraphDefaults,
+	siteUrl,
+} from "@/lib/metadata";
 import { Analytics } from "./components/analytics";
 import { ThemeProvider } from "./components/theme-provider";
 
 export const metadata: Metadata = {
-	metadataBase: new URL("https://karunanidhi.dev"),
+	metadataBase: new URL(siteUrl),
 	title: {
 		default: "karunanidhi.dev",
 		template: "%s | karunanidhi.dev",
 	},
 	description: "Founder of karunatech.ca",
 	openGraph: {
+		...openGraphDefaults,
+		images: defaultOpenGraphImages,
 		title: "karunanidhi.dev",
 		description: "Founder of karunatech.ca",
-		url: "https://karunanidhi.dev",
-		siteName: "karunanidhi.dev",
-		images: [
-			{
-				url: "https://karunanidhi.dev/logo1.png",
-				width: 1920,
-				height: 1080,
-			},
-		],
-		locale: "en-US",
-		type: "website",
 	},
 	robots: {
 		index: true,
@@ -39,7 +35,6 @@ export const metadata: Metadata = {
 		},
 	},
 	twitter: {
-		title: "Karunanidhi",
 		card: "summary_large_image",
 	},
 	icons: {

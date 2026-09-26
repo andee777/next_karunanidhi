@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Project } from "@/lib/projects";
+import type { ProjectSummary } from "@/lib/projects";
 import { Card } from "../components/card";
 import { Article } from "./article";
 
 type Props = {
-	projects: Project[];
+	projects: ProjectSummary[];
 };
 
 export function ProjectGrid({ projects }: Props) {
@@ -29,6 +29,7 @@ export function ProjectGrid({ projects }: Props) {
 					<button
 						type="button"
 						onClick={() => setActiveTag(null)}
+						aria-pressed={activeTag === null}
 						className={`px-3 py-1 text-sm rounded-full border duration-200 ${
 							activeTag === null
 								? "bg-zinc-800 text-zinc-50 border-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
@@ -42,6 +43,7 @@ export function ProjectGrid({ projects }: Props) {
 							key={tag}
 							type="button"
 							onClick={() => setActiveTag(tag)}
+							aria-pressed={activeTag === tag}
 							className={`px-3 py-1 text-sm rounded-full border duration-200 ${
 								activeTag === tag
 									? "bg-zinc-800 text-zinc-50 border-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
@@ -55,7 +57,7 @@ export function ProjectGrid({ projects }: Props) {
 			)}
 
 			{filtered.length === 0 ? (
-				<p className="text-zinc-400 dark:text-zinc-500">
+				<p className="text-zinc-600 dark:text-zinc-400">
 					No projects tagged &ldquo;{activeTag}&rdquo; yet.
 				</p>
 			) : (

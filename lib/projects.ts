@@ -20,6 +20,9 @@ export type Project = z.infer<typeof frontmatterSchema> & {
 	content: string;
 };
 
+// Everything a card needs — keeps the MDX body out of client component props.
+export type ProjectSummary = Omit<Project, "content">;
+
 let cachedProjects: Project[] | null = null;
 
 export function getAllProjects(): Project[] {

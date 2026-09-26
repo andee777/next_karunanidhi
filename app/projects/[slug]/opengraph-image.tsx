@@ -1,11 +1,17 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import { getProjectBySlug } from "@/lib/projects";
+import { getAllProjects, getProjectBySlug } from "@/lib/projects";
 
 export const alt = "Project preview";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+export function generateStaticParams(): { slug: string }[] {
+	return getAllProjects()
+		.filter((p) => p.published)
+		.map((p) => ({ slug: p.slug }));
+}
 
 function truncate(text: string, max: number): string {
 	return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;

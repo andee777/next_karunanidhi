@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
+	poweredByHeader: false,
 };
 
 export default nextConfig;

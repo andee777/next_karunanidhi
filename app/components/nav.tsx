@@ -25,29 +25,30 @@ export const Navigation: React.FC = () => {
 				className={`fixed inset-x-0 top-0 z-50 backdrop-blur  duration-200 border-b  ${
 					isIntersecting
 						? "bg-zinc-900/0 border-transparent"
-						: "bg-zinc-900/500  border-zinc-800 "
+						: "bg-zinc-50/50 border-zinc-200 dark:bg-zinc-900/50 dark:border-zinc-800"
 				}`}
 			>
 				<div className="container flex flex-row-reverse items-center justify-between p-6 mx-auto">
 					<div className="flex items-center justify-between gap-8">
 						<Link
 							href="/projects"
-							className="duration-200 text-zinc-600 hover:text-zinc-400 dark:text-zinc-400 dark:hover:text-zinc-200"
+							className="duration-200 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
 						>
 							Projects
 						</Link>
 						<Link
 							href="/contact"
-							className="duration-200 text-zinc-600 hover:text-zinc-400 dark:text-zinc-400 dark:hover:text-zinc-200"
+							className="duration-200 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
 						>
 							Contact
 						</Link>
-						<ThemeToggle className="duration-200 text-zinc-600 hover:text-zinc-400 dark:text-zinc-400 dark:hover:text-zinc-200" />
+						<ThemeToggle className="duration-200 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200" />
 					</div>
 
 					<Link
 						href="/"
-						className="duration-200 text-zinc-600 hover:text-zinc-400 dark:text-zinc-400 dark:hover:text-zinc-200"
+						aria-label="Back to home"
+						className="duration-200 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
 					>
 						<ArrowLeft className="w-6 h-6 " />
 					</Link>

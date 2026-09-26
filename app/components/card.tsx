@@ -23,16 +23,11 @@ export const Card: React.FC<PropsWithChildren> = ({ children }) => {
 		// biome-ignore lint/a11y/noStaticElementInteractions: decorative mouse-tracking gradient wrapper, not an interactive control
 		<div
 			onMouseMove={onMouseMove}
-			className="overflow-hidden relative duration-700 border rounded-xl hover:bg-zinc-400/10 dark:hover:bg-zinc-100/10 group md:gap-8 hover:border-zinc-500/10 border-zinc-300 dark:border-zinc-700 "
+			className="overflow-hidden relative duration-700 border rounded-xl hover:bg-zinc-400/10 dark:hover:bg-zinc-100/10 group md:gap-8 hover:border-zinc-500/10 border-zinc-300 dark:border-zinc-700 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-zinc-900 dark:has-[:focus-visible]:ring-zinc-100"
 		>
-			<div className="pointer-events-none">
-				<div className="absolute inset-0 z-0  transition duration-1000 [mask-image:linear-gradient(black,transparent)]" />
+			<div className="pointer-events-none" aria-hidden="true">
 				<motion.div
 					className="absolute inset-0 z-10  bg-gradient-to-br opacity-100  via-zinc-100/10  transition duration-1000 group-hover:opacity-50 "
-					style={style}
-				/>
-				<motion.div
-					className="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition duration-1000 group-hover:opacity-100"
 					style={style}
 				/>
 			</div>

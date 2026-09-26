@@ -24,7 +24,9 @@ There is no test suite. `pnpm build` (typecheck + static generation of every pro
 - `app/components/` — shared UI (`nav.tsx`, `card.tsx`, `mdx.tsx` for MDX rendering, `particles.tsx`, `analytics.tsx`, `theme-provider.tsx`/`theme-toggle.tsx` for dark mode).
 - `app/projects/project-grid.tsx` — client component: the tag filter chips + 3-column grid on `/projects`.
 - `content/projects/*.mdx` — one file per project, see "Adding a project" below.
-- `lib/projects.ts` — reads and validates `content/projects/*.mdx` at build/request time (`getAllProjects`, `getProjectBySlug`). This replaced Contentlayer, which is unmaintained — don't reintroduce it.
+- `lib/projects.ts` — reads and validates `content/projects/*.mdx` at build/request time (`getAllProjects`, `getProjectBySlug`). This replaced Contentlayer, which is unmaintained — don't reintroduce it. It imports `node:fs`, so client components may only `import type` from it.
+- `lib/metadata.ts` — `siteUrl` plus the shared OpenGraph defaults every page's metadata spreads in (see Conventions).
+- `lib/format-date.ts` — `formatDate`, the only way project dates should be rendered (see Conventions).
 - `global.css` — Tailwind v4 entry point (`@import "tailwindcss"`), the `@custom-variant dark` line (class-based dark mode, driven by next-themes toggling `.dark` on `<html>`), the `@theme` block for custom fonts, and the small `@layer base` overrides. There is no `tailwind.config.js`; theme changes go in `global.css`.
 
 ## Adding a project
@@ -39,3 +41,7 @@ Add a file to `content/projects/`, e.g. `content/projects/my-project.mdx`, with 
 - Match existing code style: tabs for indentation, double quotes, no unnecessary comments (only for genuinely non-obvious "why", not "what").
 - Brand icons (GitHub, X/Twitter, etc.) come from `@icons-pack/react-simple-icons`, not `lucide-react` — recent `lucide-react` versions dropped trademarked brand logos.
 - `params` in `app/projects/[slug]/page.tsx` (and `opengraph-image.tsx`) is a `Promise` (Next 15+ convention) — await it, don't destructure it directly.
+- Metadata: Next.js replaces a parent segment's `openGraph` (and `twitter`) object wholesale rather than merging it, so a page that sets `openGraph` must spread `openGraphDefaults` back in and set its own `url` and `alternates.canonical`. Add `images: defaultOpenGraphImages` only on routes *without* their own `opengraph-image` — an explicit `images` entry overrides the generated image.
+- Dates: render project dates with `formatDate` from `lib/format-date.ts`, never `Intl.DateTimeFormat(undefined, …)`. The default locale/time zone differ between the build machine and the browser, which shifts date-only values by a day and causes hydration mismatches in the client-rendered project grid.
+- Motion: `app/components/particles.tsx` respects `prefers-reduced-motion` (draws one still frame, no animation loop). Any new autoplaying animation needs the same treatment.
+- Focus: anything inside `Card` (which is `overflow-hidden`) can't show the browser's default outside focus ring — `Card` draws its own ring via `has-[:focus-visible]`. Keep that in mind for other `overflow-hidden` wrappers around links.

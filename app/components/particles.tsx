@@ -1,8 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useCallback, useEffect, useRef } from "react";
-import { useMousePosition } from "@/util/mouse";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 
 type ParticlesProps = {
 	className?: string;
@@ -87,6 +86,22 @@ const TARGET_FRAME_MS = 1000 / 60;
 const MAX_TIME_SCALE = 5; // caps the catch-up jump after e.g. a backgrounded tab resumes
 const SPRITE_PADDING = 2; // device px of empty margin so anti-aliased edges aren't clipped
 
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function subscribeToReducedMotion(onChange: () => void): () => void {
+	const query = window.matchMedia(REDUCED_MOTION_QUERY);
+	query.addEventListener("change", onChange);
+	return () => query.removeEventListener("change", onChange);
+}
+
+function getReducedMotion(): boolean {
+	return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
+function getServerReducedMotion(): boolean {
+	return false;
+}
+
 function clamp(value: number, min: number, max: number): number {
 	return Math.min(Math.max(value, min), max);
 }
@@ -97,6 +112,21 @@ function randomBetween(min: number, max: number): number {
 
 function pick<T>(items: T[]): T {
 	return items[Math.floor(Math.random() * items.length)];
+}
+
+// 0 within the fade band along the canvas edges, ramping up to 1 once clear.
+function computeEdgeFade(
+	particle: Particle,
+	width: number,
+	height: number,
+): number {
+	const distanceToEdge = Math.min(
+		particle.x + particle.translateX - EDGE_FADE_X,
+		width - particle.x - particle.translateX - EDGE_FADE_X,
+		particle.y + particle.translateY - EDGE_FADE_Y,
+		height - particle.y - particle.translateY - EDGE_FADE_Y,
+	);
+	return clamp(distanceToEdge / EDGE_FADE_X, 0, 1);
 }
 
 function computeTargetAlpha(
@@ -177,7 +207,11 @@ export default function Particles({
 	const frameRef = useRef<number | null>(null);
 	const lastTimestampRef = useRef<number | null>(null);
 
-	const mousePosition = useMousePosition();
+	const reducedMotion = useSyncExternalStore(
+		subscribeToReducedMotion,
+		getReducedMotion,
+		getServerReducedMotion,
+	);
 	const { resolvedTheme } = useTheme();
 	// createParticle/step are memoized once and keep running inside a single
 	// long-lived requestAnimationFrame loop, so they can't see new render's
@@ -267,13 +301,7 @@ export default function Particles({
 			const { width, height } = metricsRef.current;
 
 			particlesRef.current = particlesRef.current.map((particle) => {
-				const distanceToEdge = Math.min(
-					particle.x + particle.translateX - EDGE_FADE_X,
-					width - particle.x - particle.translateX - EDGE_FADE_X,
-					particle.y + particle.translateY - EDGE_FADE_Y,
-					height - particle.y - particle.translateY - EDGE_FADE_Y,
-				);
-				const edgeFade = clamp(distanceToEdge / EDGE_FADE_X, 0, 1);
+				const edgeFade = computeEdgeFade(particle, width, height);
 				const alpha =
 					edgeFade >= 1
 						? Math.min(
@@ -316,31 +344,61 @@ export default function Particles({
 		[staticity, ease, clearCanvas, createParticle, drawParticle],
 	);
 
+	// Reduced-motion fallback: a single still frame with every particle at its
+	// resting alpha, in place of the loop (no drift, fade-in, or parallax).
+	const drawStill = useCallback(() => {
+		clearCanvas();
+		const { width, height } = metricsRef.current;
+		for (const particle of particlesRef.current) {
+			particle.alpha =
+				particle.targetAlpha * computeEdgeFade(particle, width, height);
+			drawParticle(particle);
+		}
+	}, [clearCanvas, drawParticle]);
+
 	useEffect(() => {
 		contextRef.current = canvasRef.current?.getContext("2d") ?? null;
-		resize();
-		frameRef.current = requestAnimationFrame(step);
-		window.addEventListener("resize", resize);
+		const handleResize = reducedMotion
+			? () => {
+					resize();
+					drawStill();
+				}
+			: resize;
+		handleResize();
+		if (!reducedMotion) {
+			// So a loop restarted after reduced motion is switched back off
+			// doesn't treat the whole pause as a single frame's elapsed time.
+			lastTimestampRef.current = null;
+			frameRef.current = requestAnimationFrame(step);
+		}
+		window.addEventListener("resize", handleResize);
 
 		return () => {
-			window.removeEventListener("resize", resize);
+			window.removeEventListener("resize", handleResize);
 			if (frameRef.current !== null) {
 				cancelAnimationFrame(frameRef.current);
+				frameRef.current = null;
 			}
 		};
-	}, [resize, step]);
+	}, [reducedMotion, resize, step, drawStill]);
 
 	useEffect(() => {
-		const canvas = canvasRef.current;
-		if (!canvas) return;
-		const { width, height } = metricsRef.current;
-		const rect = canvas.getBoundingClientRect();
-		const x = mousePosition.x - rect.left - width / 2;
-		const y = mousePosition.y - rect.top - height / 2;
-		if (Math.abs(x) < width / 2 && Math.abs(y) < height / 2) {
-			mouseRef.current = { x, y };
-		}
-	}, [mousePosition.x, mousePosition.y]);
+		// Written straight to a ref rather than React state: only the rAF loop
+		// reads it, so re-rendering on every mousemove would be wasted work.
+		const handleMouseMove = (event: MouseEvent) => {
+			const canvas = canvasRef.current;
+			if (!canvas) return;
+			const { width, height } = metricsRef.current;
+			const rect = canvas.getBoundingClientRect();
+			const x = event.clientX - rect.left - width / 2;
+			const y = event.clientY - rect.top - height / 2;
+			if (Math.abs(x) < width / 2 && Math.abs(y) < height / 2) {
+				mouseRef.current = { x, y };
+			}
+		};
+		window.addEventListener("mousemove", handleMouseMove);
+		return () => window.removeEventListener("mousemove", handleMouseMove);
+	}, []);
 
 	useEffect(() => {
 		themeRef.current = resolvedTheme;
@@ -359,7 +417,8 @@ export default function Particles({
 				isDark,
 			);
 		}
-	}, [resolvedTheme]);
+		if (reducedMotion) drawStill();
+	}, [resolvedTheme, reducedMotion, drawStill]);
 
 	return (
 		<div className={className} ref={containerRef} aria-hidden="true">

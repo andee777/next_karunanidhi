@@ -1,8 +1,9 @@
 import Link from "next/link";
-import type { Project } from "@/lib/projects";
+import { formatDate } from "@/lib/format-date";
+import type { ProjectSummary } from "@/lib/projects";
 
 type Props = {
-	project: Project;
+	project: ProjectSummary;
 };
 
 export const Article: React.FC<Props> = ({ project }) => {
@@ -10,12 +11,10 @@ export const Article: React.FC<Props> = ({ project }) => {
 		<Link href={`/projects/${project.slug}`}>
 			<article className="p-4 md:p-8">
 				<div className="flex justify-between gap-2 items-center">
-					<span className="text-xs duration-1000 text-zinc-800 dark:text-zinc-400 group-hover:text-zinc-800 group-hover:border-zinc-200 drop-shadow-orange">
+					<span className="text-xs duration-1000 text-zinc-800 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200">
 						{project.date ? (
-							<time dateTime={new Date(project.date).toISOString()}>
-								{Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
-									new Date(project.date),
-								)}
+							<time dateTime={project.date.toISOString()}>
+								{formatDate(project.date)}
 							</time>
 						) : (
 							<span>SOON</span>
@@ -33,7 +32,7 @@ export const Article: React.FC<Props> = ({ project }) => {
 						{project.tags.map((tag) => (
 							<span
 								key={tag}
-								className="px-2 py-0.5 text-xs rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400"
+								className="px-2 py-0.5 text-xs rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400"
 							>
 								{tag}
 							</span>

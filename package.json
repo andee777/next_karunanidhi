@@ -25,18 +25,17 @@
 		"rehype-slug": "^6.0.0",
 		"remark-gfm": "^4.0.1",
 		"shiki": "^4.4.3",
-		"typescript": "^7.0.2",
 		"zod": "^4.6.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.14",
-		"@opentelemetry/api": "1.6.0",
 		"@tailwindcss/postcss": "^4.3.3",
 		"@tailwindcss/typography": "^0.5.20",
 		"@types/node": "^26.6.2",
 		"@types/react": "^19.3.0",
 		"@types/react-dom": "^19.3.0",
 		"tailwindcss": "^4.3.3",
-		"tailwindcss-debug-screens": "^3.0.1"
+		"tailwindcss-debug-screens": "^3.0.1",
+		"typescript": "^7.0.2"
 	}
 }
