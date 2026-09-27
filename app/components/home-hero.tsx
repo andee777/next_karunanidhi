@@ -15,47 +15,54 @@ const navigation = [
 	{ name: "Contact", href: "/contact" },
 ];
 
-const LIGHT_HEADING_CLASSES = "text-black bg-white";
-const DARK_HEADING_CLASSES = "text-white bg-zinc-900";
 const HEADING_SHARED_CLASSES =
 	"py-3.5 px-0.5 text-3xl cursor-default text-edge-outline-dark font-display sm:text-5xl md:text-6xl whitespace-nowrap bg-clip-text mb-16";
 
-const LIGHT_NAV_TEXT_CLASS = "text-zinc-700";
-const DARK_NAV_TEXT_CLASS = "text-zinc-300";
-
-const IDLE_CLIP_PATH =
-	"[clip-path:polygon(100%_0%,100%_0%,100%_0%,100%_0%,100%_0%)]";
-
-// Clicking the toggle plays a diagonal wipe (see the theme-wipe keyframes in
-// global.css) that grows from this button's top-right corner down to the
-// bottom-left, at a constant angle the whole way — no hinge/pivot on any
-// corner. The actual theme only flips once the wipe fully covers the screen
-// (handleAnimationEnd), so the instant re-color of every element happens
-// hidden behind it. A second overlay duplicates the nav text and heading in
-// the destination theme's colors and is revealed by the exact same
-// clip-path, so nothing pops to its new color before the wipe reaches it —
-// and, since it's a full-screen overlay, nothing is left uncovered to flash
-// when the wipe finally hands off to the real (now up to date) page.
+// Clicking the toggle uses the View Transitions API (see the ::view-transition
+// rules in global.css) to play a diagonal wipe that grows from this button's
+// top-right corner down to the bottom-left. Unlike a hand-rolled overlay, the
+// browser itself snapshots the old page, applies the DOM update, snapshots
+// the new page, and only swaps them in atomically — there's no window where
+// application code has to guess whether the real page has "caught up" yet,
+// which a from-scratch clip-path-overlay version (tried first) kept
+// occasionally losing by a frame. Falls back to an instant switch when the
+// API or reduced-motion rules it out.
+//
+// Known limitation: under rapid repeated toggling, Chromium can still
+// occasionally flash one stray frame of the previous theme after the new one
+// has settled — confirmed by frame-by-frame video review in both directions,
+// with the toggle's own icon (driven by separate React state) staying put
+// throughout, meaning the flash isn't from our own click handler re-firing.
+// This matches a real, currently-open browser bug: starting a new view
+// transition is supposed to let the previous one finish its cancellation
+// before the new one starts capturing, but Chrome doesn't reliably enforce
+// that ordering (https://issues.chromium.org/issues/477200524; see also the
+// related Firefox crash report at
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1959116). The mitigations
+// below (an explicit skip of any transition our own lock somehow missed,
+// plus a generous cooldown before allowing another one) reduce how often a
+// click lands in the vulnerable window, but can't guarantee it never will —
+// that part is out of our hands until the browser fixes it.
 export function HomeHero() {
 	const { resolvedTheme, setTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	// The toggle's own icon/color update the instant it's clicked, tracked
 	// separately from `resolvedTheme` — which only actually changes once the
-	// wipe finishes covering the screen (see handleAnimationEnd) — so the
-	// button gives immediate feedback instead of waiting out the animation.
+	// transition's DOM-update callback runs — so the button gives immediate
+	// feedback instead of waiting out the animation.
 	const [iconTheme, setIconTheme] = useState<"light" | "dark">();
-	// Locks the button out for the length of the wipe: retriggering mid-wipe
-	// recomputed `next` from the still-stale `resolvedTheme`, so a second
-	// click just restarted the same animation instead of reversing it — and
-	// interrupting one wipe's animation-end never let its pending setTheme
-	// run, leaving the two overlays and the real page free to disagree.
+	// Locks the button out for the length of the transition: retriggering
+	// mid-transition would recompute `next` from the still-stale
+	// `resolvedTheme` and start a second, overlapping transition.
 	const [isToggling, setIsToggling] = useState(false);
 	const isTogglingRef = useRef(false);
-	const bgOverlayRef = useRef<HTMLDivElement>(null);
-	const overlayWrapperRef = useRef<HTMLDivElement>(null);
-	const navDuplicateRef = useRef<HTMLElement>(null);
-	const headingTextRef = useRef<HTMLDivElement>(null);
-	const pendingThemeRef = useRef<"light" | "dark" | null>(null);
+	// Defense in depth for the Chromium bug linked above: if handleToggle is
+	// ever reached while a transition is still active despite the lock, skip
+	// it explicitly (and wait for its own cancellation) instead of letting a
+	// second startViewTransition call race it implicitly.
+	const activeTransitionRef = useRef<ReturnType<
+		typeof document.startViewTransition
+	> | null>(null);
 
 	useEffect(() => {
 		setMounted(true);
@@ -72,15 +79,9 @@ export function HomeHero() {
 
 		const next = resolvedTheme === "dark" ? "light" : "dark";
 		setIconTheme(next);
-		const bg = bgOverlayRef.current;
-		const overlayWrapper = overlayWrapperRef.current;
-		const navDuplicate = navDuplicateRef.current;
-		const headingText = headingTextRef.current;
+
 		if (
-			!bg ||
-			!overlayWrapper ||
-			!navDuplicate ||
-			!headingText ||
+			typeof document.startViewTransition !== "function" ||
 			window.matchMedia(REDUCED_MOTION_QUERY).matches
 		) {
 			setTheme(next);
@@ -89,51 +90,46 @@ export function HomeHero() {
 
 		isTogglingRef.current = true;
 		setIsToggling(true);
-		pendingThemeRef.current = next;
-		bg.dataset.theme = next;
-		navDuplicate.className =
-			next === "dark" ? DARK_NAV_TEXT_CLASS : LIGHT_NAV_TEXT_CLASS;
-		headingText.className = `${HEADING_SHARED_CLASSES} ${
-			next === "dark" ? DARK_HEADING_CLASSES : LIGHT_HEADING_CLASSES
-		}`;
 
-		for (const el of [bg, overlayWrapper]) {
-			el.classList.remove("theme-wipe-run");
-		}
-		// Forces a reflow so re-adding the class restarts the animation if the
-		// button is clicked again before the previous wipe finishes.
-		void bg.offsetWidth;
-		for (const el of [bg, overlayWrapper]) {
-			el.classList.add("theme-wipe-run");
-		}
-	}
+		// Should be unreachable (isTogglingRef already gates this), but if a
+		// transition is somehow still marked active, skip it and let its own
+		// cancellation run to completion before starting a new one, rather than
+		// relying on Chrome's own implicit skip-and-restart handling — which is
+		// exactly what issue 477200524 says doesn't reliably order correctly.
+		activeTransitionRef.current?.skipTransition();
 
-	function handleAnimationEnd() {
-		// flushSync forces the real page's colors to actually finish updating
-		// before the wipe overlays are removed below — otherwise React's
-		// re-render can land a frame late, and the old theme flashes back for
-		// an instant where the (by-then-collapsed) overlays used to be.
-		if (pendingThemeRef.current) {
-			const next = pendingThemeRef.current;
-			pendingThemeRef.current = null;
+		const transition = document.startViewTransition(() => {
 			flushSync(() => setTheme(next));
-		}
-		// Belt-and-suspenders on top of flushSync: wait one more real paint
-		// (rAF fires just before the browser's next repaint) before revealing
-		// what's behind the overlays, so the updated theme is guaranteed to
-		// have actually been painted — not just committed — while still
-		// hidden, however the update above ends up scheduled internally.
-		requestAnimationFrame(() => {
-			bgOverlayRef.current?.classList.remove("theme-wipe-run");
-			overlayWrapperRef.current?.classList.remove("theme-wipe-run");
-			isTogglingRef.current = false;
-			setIsToggling(false);
+		});
+		activeTransitionRef.current = transition;
+
+		transition.finished.finally(() => {
+			if (activeTransitionRef.current === transition) {
+				activeTransitionRef.current = null;
+			}
+			// `finished` resolving means the transition's animations are done,
+			// but per the Chromium bug linked above, the browser's own internal
+			// cancellation/cleanup bookkeeping isn't guaranteed to be finished
+			// yet — starting a new transition inside that trailing window is
+			// what has produced the stray-frame flash on video. A generous
+			// wall-clock margin (not requestAnimationFrame: that's scheduled by
+			// the rendering/compositor pipeline, which is under extra load from
+			// whatever's recording the screen to catch this bug in the first
+			// place, making it the wrong clock to depend on here) gives that
+			// cleanup more room to finish before a rapid next click is let
+			// through — reduces how often the window gets hit, but since this
+			// is a browser-side race rather than one in this code, it can't be
+			// guaranteed to close it entirely.
+			setTimeout(() => {
+				isTogglingRef.current = false;
+				setIsToggling(false);
+			}, 400);
 		});
 	}
 
 	// Built from navPill's pieces rather than the shared constant itself: its
 	// dark: hover/focus colors only apply once the real .dark class flips (at
-	// the end of the wipe), but this button's own feedback should be
+	// the end of the transition), but this button's own feedback should be
 	// instant, so those pieces are keyed off `iconTheme` instead.
 	const toggleClassName = `absolute top-4 right-4 z-30 p-2 rounded-full duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ${
 		iconTheme === "dark"
@@ -146,15 +142,6 @@ export function HomeHero() {
 			id="home"
 			className="relative isolate flex flex-col items-center justify-center w-full h-screen overflow-hidden bg-zinc-50 dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,var(--color-zinc-800),var(--color-zinc-950))]"
 		>
-			{/* Background color wipe, kept below the particles so the bracket
-			    glyphs stay visible on top while the theme's color sweeps past. */}
-			<div
-				ref={bgOverlayRef}
-				aria-hidden="true"
-				onAnimationEnd={handleAnimationEnd}
-				className={`absolute inset-0 z-0 pointer-events-none ${IDLE_CLIP_PATH} data-[theme=dark]:bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,var(--color-zinc-800),var(--color-zinc-950))] data-[theme=light]:bg-zinc-50`}
-			/>
-
 			{mounted ? (
 				<button
 					type="button"
@@ -199,35 +186,6 @@ export function HomeHero() {
 			>
 				karunanidhi.dev
 			</h1>
-
-			{/* Exact duplicate of the nav+heading layout, colored for the
-			    destination theme and revealed by the same clip-path as the
-			    background wipe, so nothing here is left to snap into its new
-			    color once the wipe finishes and this overlay disappears. */}
-			<div
-				ref={overlayWrapperRef}
-				aria-hidden="true"
-				className={`absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none ${IDLE_CLIP_PATH}`}
-			>
-				<nav
-					ref={navDuplicateRef}
-					className={`${LIGHT_NAV_TEXT_CLASS} mt-0 mb-6 text-lg`}
-				>
-					<ul className="flex items-center justify-center gap-2 w-[420px]">
-						{navigation.map((item) => (
-							<li key={item.href}>
-								<span className="block px-4 py-1.5 font-bold">{item.name}</span>
-							</li>
-						))}
-					</ul>
-				</nav>
-				<div
-					ref={headingTextRef}
-					className={`${HEADING_SHARED_CLASSES} text-black bg-white`}
-				>
-					karunanidhi.dev
-				</div>
-			</div>
 		</div>
 	);
 }

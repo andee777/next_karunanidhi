@@ -289,17 +289,18 @@ export default function Particles({
 
 			particlesRef.current = particlesRef.current.map((particle) => {
 				const edgeFade = computeEdgeFade(particle, width, height);
-				// Ramps towards targetAlpha from either side — a plain
-				// `Math.min(alpha + step, target)` only ever rises, so a theme
-				// switch that lowers the target (dark's palette is more opaque
-				// than light's) would otherwise snap particles dim instantly
-				// instead of fading down with the rest of the transition.
+				// Ramps towards the (edge-faded) target from either side, near
+				// the edges too: a theme switch re-rolls every targetAlpha, and
+				// assigning `targetAlpha * edgeFade` directly there made glyphs
+				// in the edge band visibly pop by up to ~0.4 alpha in one frame.
 				const maxStep = ALPHA_RAMP_STEP * timeScale;
 				const alpha =
-					edgeFade >= 1
-						? particle.alpha +
-							clamp(particle.targetAlpha - particle.alpha, -maxStep, maxStep)
-						: particle.targetAlpha * edgeFade;
+					particle.alpha +
+					clamp(
+						particle.targetAlpha * edgeFade - particle.alpha,
+						-maxStep,
+						maxStep,
+					);
 
 				const nextX = particle.x + particle.dx * timeScale;
 				const nextY = particle.y + particle.dy * timeScale;

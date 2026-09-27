@@ -11,12 +11,13 @@
 }
 
 /* Home page's theme toggle (HomeHero): a diagonal reveal that travels from
-   the button's top-right corner to the bottom-left one. The boundary line
-   (P2–P4, the "active" edge each half) stays parallel to the TL–BR diagonal
-   the entire time — it only translates, never rotating around a fixed
-   corner — because P1 (TR) and P5 (TL) hold still while P2/P3/P4 slide along
-   the right, bottom and left edges in turn. Every stop keeps the same
-   5-point count so the browser tweens it smoothly. */
+   the button's top-right corner to the bottom-left one, via the View
+   Transitions API. The boundary line (P2–P4, the "active" edge each half)
+   stays parallel to the TL–BR diagonal the entire time — it only
+   translates, never rotating around a fixed corner — because P1 (TR) and P5
+   (TL) hold still while P2/P3/P4 slide along the right, bottom and left
+   edges in turn. Every stop keeps the same 5-point count so the browser
+   tweens it smoothly. */
 @keyframes theme-wipe {
 	0% {
 		clip-path: polygon(100% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
@@ -29,7 +30,21 @@
 	}
 }
 
-.theme-wipe-run {
+/* The old page's snapshot sits still underneath, fully opaque, while the new
+   page's snapshot (already reflecting the flipped theme — the DOM update
+   happens before this snapshot is taken) wipes in on top of it. Resetting
+   both to the default animation/blend-mode first undoes the browser's
+   built-in cross-fade, which would otherwise run at the same time and — since
+   its default mix-blend-mode is tuned for two *fading* layers, not one static
+   one under a hard clip-path edge — show a stray bright/dark seam along that
+   edge. */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
 	/* linear, not ease-in-out: an easing curve applies separately across each
 	   half (0%–50% and 50%–100%), so it decelerates into the midpoint and
 	   re-accelerates out of it — reading as a stutter/pause right in the
